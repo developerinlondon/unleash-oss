@@ -124,7 +124,7 @@ describe('enterprise extension: enable change requests', () => {
         ]);
     });
 
-    test('the emitted event contains no changeRequestEnvironments if we are not on enterprise', async () => {
+    test('the emitted event contains empty changeRequestEnvironments when none are specified', async () => {
         const { service, eventService } = createService('oss');
 
         const projectId = 'fake-project-id';
@@ -143,7 +143,7 @@ describe('enterprise extension: enable change requests', () => {
         );
 
         const { events } = await eventService.getEvents();
-        expect(events[0].data.changeRequestEnvironments).toBeUndefined();
+        expect(events[0].data.changeRequestEnvironments).toEqual([]);
     });
 
     test('the emitted event contains the list of change request envs returned from the extension function, *not* what was passed in', async () => {

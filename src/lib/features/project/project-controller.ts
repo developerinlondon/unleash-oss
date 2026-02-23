@@ -5,7 +5,10 @@ import {
     type IFlagResolver,
     type IProjectParam,
     type IUnleashConfig,
+    CREATE_PROJECT,
+    DELETE_PROJECT,
     NONE,
+    UPDATE_PROJECT,
     serializeDates,
 } from '../../types/index.js';
 import ProjectFeaturesController from '../feature-toggle/feature-toggle-controller.js';
@@ -14,16 +17,27 @@ import ProjectHealthReport from '../../routes/admin-api/project/health-report.js
 import type ProjectService from './project-service.js';
 import VariantsController from '../../routes/admin-api/project/variants.js';
 import {
+    createRequestSchema,
     createResponseSchema,
+    type CreateProjectSchema,
+    createProjectSchema,
     outdatedSdksSchema,
     type OutdatedSdksSchema,
+    type ProjectCreatedSchema,
+    projectCreatedSchema,
     type ProjectDoraMetricsSchema,
     projectDoraMetricsSchema,
     projectOverviewSchema,
     type ProjectsSchema,
     projectsSchema,
+    resourceCreatedResponseSchema,
+    type UpdateProjectSchema,
+    updateProjectSchema,
 } from '../../openapi/index.js';
-import { getStandardResponses } from '../../openapi/util/standard-responses.js';
+import {
+    emptyResponse,
+    getStandardResponses,
+} from '../../openapi/util/standard-responses.js';
 import type { IUnleashServices, OpenApiService } from '../../services/index.js';
 import type { IAuthRequest } from '../../routes/unleash-types.js';
 import { ProjectApiTokenController } from '../../routes/admin-api/project/api-token.js';
@@ -197,6 +211,69 @@ export default class ProjectController extends Controller {
             ],
         });
 
+        this.route({
+            method: 'post',
+            path: '',
+            handler: this.createProject,
+            permission: CREATE_PROJECT,
+            middleware: [
+                this.openApiService.validPath({
+                    tags: ['Projects'],
+                    operationId: 'createProject',
+                    summary: 'Create a new project.',
+                    description:
+                        'Creates a new project with the specified configuration.',
+                    requestBody: createRequestSchema('createProjectSchema'),
+                    responses: {
+                        201: resourceCreatedResponseSchema(
+                            'projectCreatedSchema',
+                        ),
+                        ...getStandardResponses(401, 403, 409),
+                    },
+                }),
+            ],
+        });
+
+        this.route({
+            method: 'put',
+            path: '/:projectId',
+            handler: this.updateProject,
+            permission: UPDATE_PROJECT,
+            middleware: [
+                this.openApiService.validPath({
+                    tags: ['Projects'],
+                    operationId: 'updateProject',
+                    summary: 'Update a project.',
+                    description: 'Updates the project with the given ID.',
+                    requestBody: createRequestSchema('updateProjectSchema'),
+                    responses: {
+                        200: emptyResponse,
+                        ...getStandardResponses(401, 403, 404),
+                    },
+                }),
+            ],
+        });
+
+        this.route({
+            method: 'delete',
+            path: '/:projectId',
+            handler: this.deleteProject,
+            permission: DELETE_PROJECT,
+            acceptAnyContentType: true,
+            middleware: [
+                this.openApiService.validPath({
+                    tags: ['Projects'],
+                    operationId: 'deleteProject',
+                    summary: 'Delete a project.',
+                    description: 'Deletes the project with the given ID.',
+                    responses: {
+                        200: emptyResponse,
+                        ...getStandardResponses(401, 403, 404),
+                    },
+                }),
+            ],
+        });
+
         this.use('/', new ProjectFeaturesController(config, services).router);
         this.use('/', new DependentFeaturesController(config, services).router);
         this.use(
@@ -222,12 +299,7 @@ export default class ProjectController extends Controller {
         res: Response<ProjectsSchema>,
     ): Promise<void> {
         const { user } = req;
-        const projects = await this.projectService.getProjects(
-            {
-                id: 'default',
-            },
-            user.id,
-        );
+        const projects = await this.projectService.getProjects({}, user.id);
 
         const projectsWithOwners =
             await this.projectService.addOwnersToProjects(projects);
@@ -344,5 +416,47 @@ export default class ProjectController extends Controller {
             outdatedSdksSchema.$id,
             { sdks: outdatedSdks },
         );
+    }
+
+    async createProject(
+        req: IAuthRequest<unknown, unknown, CreateProjectSchema>,
+        res: Response<ProjectCreatedSchema>,
+    ): Promise<void> {
+        const { user } = req;
+        const project = await this.projectService.createProject(
+            req.body,
+            user,
+            req.audit,
+        );
+
+        this.openApiService.respondWithValidation(
+            201,
+            res,
+            projectCreatedSchema.$id,
+            serializeDates(project),
+            { location: `projects/${project.id}` },
+        );
+    }
+
+    async updateProject(
+        req: IAuthRequest<IProjectParam, unknown, UpdateProjectSchema>,
+        res: Response,
+    ): Promise<void> {
+        const { projectId } = req.params;
+        await this.projectService.updateProject(
+            { ...req.body, id: projectId },
+            req.audit,
+        );
+        res.status(200).end();
+    }
+
+    async deleteProject(
+        req: IAuthRequest<IProjectParam>,
+        res: Response,
+    ): Promise<void> {
+        const { projectId } = req.params;
+        const { user } = req;
+        await this.projectService.deleteProject(projectId, user, req.audit);
+        res.status(200).end();
     }
 }

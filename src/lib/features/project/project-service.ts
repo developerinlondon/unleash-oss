@@ -393,7 +393,7 @@ export default class ProjectService {
         };
 
         const validatedData = await validateData();
-        const data = this.removePropertiesForNonEnterprise(validatedData);
+        const data = validatedData;
 
         await this.projectStore.create(data);
 
@@ -411,22 +411,19 @@ export default class ProjectService {
             }),
         );
 
-        if (this.isEnterprise) {
-            if (newProject.changeRequestEnvironments) {
-                await this.validateEnvironmentsExist(
-                    newProject.changeRequestEnvironments.map((env) => env.name),
+        if (newProject.changeRequestEnvironments) {
+            await this.validateEnvironmentsExist(
+                newProject.changeRequestEnvironments.map((env) => env.name),
+            );
+            const allChangeRequestEnvironments =
+                await this.getAllChangeRequestEnvironments(newProject);
+            const changeRequestEnvironments =
+                await enableChangeRequestsForSpecifiedEnvironments(
+                    allChangeRequestEnvironments,
                 );
-                const allChangeRequestEnvironments =
-                    await this.getAllChangeRequestEnvironments(newProject);
-                const changeRequestEnvironments =
-                    await enableChangeRequestsForSpecifiedEnvironments(
-                        allChangeRequestEnvironments,
-                    );
-
-                data.changeRequestEnvironments = changeRequestEnvironments;
-            } else {
-                data.changeRequestEnvironments = [];
-            }
+            data.changeRequestEnvironments = changeRequestEnvironments;
+        } else {
+            data.changeRequestEnvironments = [];
         }
 
         await this.accessService.createDefaultProjectRoles(user, data.id);
@@ -1353,14 +1350,5 @@ export default class ProjectService {
             members,
             version: 1,
         };
-    }
-
-    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    removePropertiesForNonEnterprise(data): any {
-        if (this.isEnterprise) {
-            return data;
-        }
-        const { mode, changeRequestEnvironments, ...proData } = data;
-        return proData;
     }
 }

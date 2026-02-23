@@ -25,6 +25,10 @@ import {
     DROP_TAG_TYPES,
     DROP_TAGS,
     ENVIRONMENT_IMPORT,
+    ENVIRONMENT_CREATED,
+    ENVIRONMENT_UPDATED,
+    ENVIRONMENT_DELETED,
+    ENVIRONMENT_CLONED,
     FEATURE_ARCHIVED,
     FEATURE_COMPLETED,
     FEATURE_CREATED,
@@ -2002,6 +2006,57 @@ export class UserPreferenceUpdatedEvent extends BaseEvent {
     }) {
         super(USER_PREFERENCE_UPDATED, eventData.auditUser);
         this.userId = eventData.userId;
+        this.data = eventData.data;
+    }
+}
+
+export class EnvironmentCreatedEvent extends BaseEvent {
+    readonly data: any;
+
+    constructor(eventData: {
+        data: any;
+        auditUser: IAuditUser;
+    }) {
+        super(ENVIRONMENT_CREATED, eventData.auditUser);
+        this.data = eventData.data;
+    }
+}
+
+export class EnvironmentUpdatedEvent extends BaseEvent {
+    readonly data: any;
+    readonly preData: any;
+
+    constructor(eventData: {
+        data: any;
+        preData: any;
+        auditUser: IAuditUser;
+    }) {
+        super(ENVIRONMENT_UPDATED, eventData.auditUser);
+        this.data = eventData.data;
+        this.preData = eventData.preData;
+    }
+}
+
+export class EnvironmentDeletedEvent extends BaseEvent {
+    readonly preData: any;
+
+    constructor(eventData: {
+        preData: any;
+        auditUser: IAuditUser;
+    }) {
+        super(ENVIRONMENT_DELETED, eventData.auditUser);
+        this.preData = eventData.preData;
+    }
+}
+
+export class EnvironmentClonedEvent extends BaseEvent {
+    readonly data: any;
+
+    constructor(eventData: {
+        data: any;
+        auditUser: IAuditUser;
+    }) {
+        super(ENVIRONMENT_CLONED, eventData.auditUser);
         this.data = eventData.data;
     }
 }

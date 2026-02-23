@@ -29,7 +29,6 @@ export class FeatureEnvironmentStore implements IFeatureEnvironmentStore {
 
     private readonly timer: Function;
 
-    private readonly isOss: boolean;
     constructor(
         db: Db,
         eventBus: EventEmitter,
@@ -41,7 +40,6 @@ export class FeatureEnvironmentStore implements IFeatureEnvironmentStore {
                 store: 'feature-environments',
                 action,
             });
-        this.isOss = isOss;
     }
 
     async delete({
@@ -103,27 +101,6 @@ export class FeatureEnvironmentStore implements IFeatureEnvironmentStore {
     }
 
     addOssFilterIfNeeded(queryBuilder) {
-        if (this.isOss) {
-            return queryBuilder
-                .join(
-                    'environments',
-                    'environments.name',
-                    '=',
-                    `${T.featureEnvs}.environment`,
-                )
-                .whereIn('environments.name', [
-                    'default',
-                    'development',
-                    'production',
-                ])
-                .select([
-                    'feature_name',
-                    'environment',
-                    'variants',
-                    'last_seen_at',
-                    `${T.featureEnvs}.enabled`,
-                ]);
-        }
         return queryBuilder;
     }
 

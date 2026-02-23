@@ -69,8 +69,6 @@ class ProjectStore implements IProjectStore {
 
     private logger: Logger;
 
-    private isOss: boolean;
-
     private timer: Function;
 
     constructor(
@@ -85,7 +83,6 @@ class ProjectStore implements IProjectStore {
                 store: 'project',
                 action,
             });
-        this.isOss = isOss;
     }
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -136,9 +133,6 @@ class ProjectStore implements IProjectStore {
             .orderBy('name', 'asc');
 
         projects = projects.where(`${TABLE}.archived_at`, null);
-        if (this.isOss) {
-            projects = projects.where('id', 'default');
-        }
 
         const rows = await projects;
         stop();

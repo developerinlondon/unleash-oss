@@ -1,7 +1,12 @@
 import {
     DefaultStrategyUpdatedEvent,
+    EnvironmentCreatedEvent,
+    EnvironmentUpdatedEvent,
+    EnvironmentDeletedEvent,
+    EnvironmentClonedEvent,
     type IAuditUser,
     type IEnvironment,
+    type IEnvironmentCreate,
     type IEnvironmentStore,
     type IFeatureEnvironmentStore,
     type IFeatureStrategiesStore,
@@ -294,5 +299,80 @@ export default class EnvironmentService {
                 auditUser,
             }),
         );
+    }
+
+    async create(
+        env: IEnvironmentCreate,
+        auditUser: IAuditUser,
+    ): Promise<IEnvironment> {
+        const created = await this.environmentStore.create(env);
+        await this.eventService.storeEvent(
+            new EnvironmentCreatedEvent({
+                data: created,
+                auditUser,
+            }),
+        );
+        return created;
+    }
+
+    async update(
+        name: string,
+        env: Pick<IEnvironment, 'type' | 'protected' | 'requiredApprovals'>,
+        auditUser: IAuditUser,
+    ): Promise<IEnvironment> {
+        const preData = await this.environmentStore.get(name);
+        const updated = await this.environmentStore.update(env, name);
+        await this.eventService.storeEvent(
+            new EnvironmentUpdatedEvent({
+                data: updated,
+                preData,
+                auditUser,
+            }),
+        );
+        return updated;
+    }
+
+    async delete(name: string, auditUser: IAuditUser): Promise<void> {
+        const env = await this.environmentStore.get(name);
+        await this.environmentStore.delete(name);
+        await this.eventService.storeEvent(
+            new EnvironmentDeletedEvent({
+                preData: env,
+                auditUser,
+            }),
+        );
+    }
+
+    async clone(
+        name: string,
+        newName: string,
+        type: string,
+        auditUser: IAuditUser,
+    ): Promise<IEnvironment> {
+        const source = await this.environmentStore.get(name);
+        if (!source) {
+            throw new NotFoundError(`Environment ${name} not found`);
+        }
+        const maxSortOrder = await this.environmentStore.getMaxSortOrder();
+        const created = await this.environmentStore.create({
+            name: newName,
+            type,
+            sortOrder: maxSortOrder + 1,
+            enabled: source.enabled,
+        });
+        await this.eventService.storeEvent(
+            new EnvironmentClonedEvent({
+                data: { ...created, clonedFrom: name },
+                auditUser,
+            }),
+        );
+        return created;
+    }
+
+    async validateEnvironmentName(name: string): Promise<void> {
+        const nameExists = await this.environmentStore.exists(name);
+        if (nameExists) {
+            throw new NameExistsError(`Environment ${name} already exists`);
+        }
     }
 }

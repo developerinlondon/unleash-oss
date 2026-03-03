@@ -111,8 +111,6 @@ export default class EnvironmentStore implements IEnvironmentStore {
 
     private db: Db;
 
-    private isOss: boolean;
-
     private timer: (string) => any;
 
     constructor(
@@ -120,13 +118,12 @@ export default class EnvironmentStore implements IEnvironmentStore {
         eventBus: EventEmitter,
         {
             getLogger,
-            isOss,
             flagResolver,
-        }: Pick<IUnleashConfig, 'getLogger' | 'isOss' | 'flagResolver'>,
+        }: Pick<IUnleashConfig, 'getLogger' | 'flagResolver'>,
     ) {
         this.db = db;
         this.logger = getLogger('db/environment-store.ts');
-        this.isOss = isOss;
+
         this.flagResolver = flagResolver;
         this.timer = (action) =>
             metricsHelper.wrapTimer(eventBus, DB_TIME, {
@@ -167,14 +164,10 @@ export default class EnvironmentStore implements IEnvironmentStore {
 
     async get(key: string): Promise<IEnvironment> {
         const stopTimer = this.timer('get');
-        let keyQuery = this.db<IEnvironmentsTable>(TABLE).where({ name: key });
-        if (this.isOss) {
-            keyQuery = keyQuery.whereIn('name', [
-                'default',
-                'development',
-                'production',
-            ]);
-        }
+        const keyQuery = this.db<IEnvironmentsTable>(TABLE).where({
+            name: key,
+        });
+
         const row = await keyQuery.first();
         stopTimer();
         if (row) {
@@ -194,9 +187,7 @@ export default class EnvironmentStore implements IEnvironmentStore {
         if (query) {
             qB = qB.where(query);
         }
-        if (this.isOss) {
-            qB = qB.whereIn('name', ['default', 'development', 'production']);
-        }
+
         const rows = await qB;
         stopTimer();
         return rows.map(mapRow);
@@ -224,9 +215,7 @@ export default class EnvironmentStore implements IEnvironmentStore {
         if (query) {
             qB = qB.where(query);
         }
-        if (this.isOss) {
-            qB = qB.whereIn('name', ['default', 'development', 'production']);
-        }
+
         const rows = await qB;
         stopTimer();
         return rows.map(mapRowWithCounts);
@@ -275,13 +264,6 @@ export default class EnvironmentStore implements IEnvironmentStore {
 
         if (query) {
             qB = qB.where(query);
-        }
-        if (this.isOss) {
-            qB = qB.whereIn('environments.name', [
-                'default',
-                'production',
-                'development',
-            ]);
         }
 
         const rows = await qB;

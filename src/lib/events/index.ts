@@ -101,6 +101,7 @@ export const ENVIRONMENT_IMPORT = 'environment-import' as const;
 export const ENVIRONMENT_CREATED = 'environment-created' as const;
 export const ENVIRONMENT_UPDATED = 'environment-updated' as const;
 export const ENVIRONMENT_DELETED = 'environment-deleted' as const;
+export const ENVIRONMENT_CLONED = 'environment-cloned' as const;
 export const SEGMENT_CREATED = 'segment-created' as const;
 export const SEGMENT_UPDATED = 'segment-updated' as const;
 export const SEGMENT_DELETED = 'segment-deleted' as const;
@@ -317,6 +318,7 @@ export const IEventTypes = [
     ENVIRONMENT_CREATED,
     ENVIRONMENT_UPDATED,
     ENVIRONMENT_DELETED,
+    ENVIRONMENT_CLONED,
     SEGMENT_CREATED,
     SEGMENT_UPDATED,
     SEGMENT_DELETED,

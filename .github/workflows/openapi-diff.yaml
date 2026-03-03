@@ -15,6 +15,10 @@ on:
         description: 'Stable Unleash version or commit SHA to compare against (e.g. v6.9.3, or a commit SHA).'
         required: true
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   generate-openapi-stable:
     name: Generate OpenAPI (stable)

@@ -14,11 +14,7 @@ jobs:
     strategy:
       matrix:
         test:
-          - feature/feature.spec.ts
-          - groups/groups.spec.ts
-          - projects/access.spec.ts
-          - segments/segments.spec.ts
-          # - login/login.spec.ts
+          - oss/feature/feature.spec.ts
     steps:
       - name: Dump GitHub context
         env:
@@ -32,16 +28,14 @@ jobs:
           cd frontend
           yarn install --immutable
           yarn build
-      - name: Start Unleash test instance
+      - name: Start Unleash OSS test instance
         run: |
-          docker compose -f .github/docker-compose.test.yml up -d --wait -t 90
-        env:
-          FRONTEND_TEST_LICENSE: ${{ secrets.FRONTEND_TEST_LICENSE }}
+          docker compose -f .github/docker-compose.oss-test.yml up -d --wait -t 180
       - name: Run Cypress
         uses: cypress-io/github-action@v6
         with:
           working-directory: frontend
           env: AUTH_USER=admin,AUTH_PASSWORD=unleash4all
           config: baseUrl=http://localhost:3000
-          spec: cypress/integration/${{ matrix.test }}
+          spec: cypress/${{ matrix.test }}
           install-command: yarn --immutable

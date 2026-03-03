@@ -99,24 +99,6 @@ const rbacMiddleware = (
             ) {
                 projectId = 'default';
             }
-            if (config.isOss) {
-                if (projectId !== undefined && projectId !== 'default') {
-                    logger.error(
-                        'OSS is only allowed to work with default project.',
-                    );
-                    return false;
-                }
-                const ossEnvs = ['default', 'development', 'production'];
-                if (
-                    environment !== undefined &&
-                    !ossEnvs.includes(environment)
-                ) {
-                    logger.error(
-                        `OSS is only allowed to work with ${ossEnvs} environments.`,
-                    );
-                    return false;
-                }
-            }
 
             // DELETE segment does not include information about the segment's project
             // This is needed to check if the user has the right permissions on a project level

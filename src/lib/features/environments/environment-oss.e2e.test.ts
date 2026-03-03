@@ -48,24 +48,32 @@ afterAll(async () => {
     await db.destroy();
 });
 
-test('querying environments in OSS only returns environments that are included in oss', async () => {
+test('querying environments returns all environments including custom ones', async () => {
     await app.request
         .get('/api/admin/environments')
         .expect(200)
         .expect((res) => {
-            expect(res.body.environments).toHaveLength(2);
+            expect(res.body.environments).toHaveLength(5);
             const names = res.body.environments.map((env) => env.name);
-            expect(names).toEqual(['development', 'production']);
+            expect(names).toContain('development');
+            expect(names).toContain('production');
+            expect(names).toContain('customenvironment');
+            expect(names).toContain('customenvironment2');
+            expect(names).toContain('customenvironment3');
         });
 });
 
-test('querying project environments in OSS only returns environments that are included in oss', async () => {
+test('querying project environments returns all environments', async () => {
     await app.request
         .get('/api/admin/environments/project/default')
         .expect(200)
         .expect((res) => {
-            expect(res.body.environments).toHaveLength(2);
+            expect(res.body.environments).toHaveLength(5);
             const names = res.body.environments.map((env) => env.name);
-            expect(names).toEqual(['development', 'production']);
+            expect(names).toContain('development');
+            expect(names).toContain('production');
+            expect(names).toContain('customenvironment');
+            expect(names).toContain('customenvironment2');
+            expect(names).toContain('customenvironment3');
         });
 });

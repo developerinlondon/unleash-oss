@@ -28,7 +28,6 @@ exports[`returns all baseRoutes 1`] = `
         "_status": -1,
       },
     },
-    "enterprise": true,
     "menu": {},
     "parent": "/projects",
     "path": "/projects/create",
@@ -93,7 +92,6 @@ exports[`returns all baseRoutes 1`] = `
   },
   {
     "component": [Function],
-    "enterprise": true,
     "menu": {},
     "path": "/projects-archive",
     "title": "Projects archive",
@@ -274,7 +272,6 @@ exports[`returns all baseRoutes 1`] = `
   },
   {
     "component": [Function],
-    "enterprise": true,
     "menu": {
       "main": true,
     },

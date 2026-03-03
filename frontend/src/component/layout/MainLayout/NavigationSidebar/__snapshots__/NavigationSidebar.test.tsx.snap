@@ -113,6 +113,10 @@ exports[`order of items in navigation > menu for open-source 1`] = `
   },
   {
     "icon": "StopRoundedIcon",
+    "text": "Environments",
+  },
+  {
+    "icon": "StopRoundedIcon",
     "text": "Tag types",
   },
   {

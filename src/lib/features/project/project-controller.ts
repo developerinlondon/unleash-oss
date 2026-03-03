@@ -20,7 +20,6 @@ import {
     createRequestSchema,
     createResponseSchema,
     type CreateProjectSchema,
-    createProjectSchema,
     outdatedSdksSchema,
     type OutdatedSdksSchema,
     type ProjectCreatedSchema,
@@ -32,7 +31,6 @@ import {
     projectsSchema,
     resourceCreatedResponseSchema,
     type UpdateProjectSchema,
-    updateProjectSchema,
 } from '../../openapi/index.js';
 import {
     emptyResponse,

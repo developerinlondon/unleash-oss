@@ -130,7 +130,6 @@ export const routes: IRoute[] = [
         component: ArchiveProjectList,
         type: 'protected',
         menu: {},
-
     },
 
     // Flags overview
@@ -297,7 +296,6 @@ export const routes: IRoute[] = [
         component: EnvironmentTable,
         type: 'protected',
         menu: { main: true },
-
     },
     {
         path: '/feedback',

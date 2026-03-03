@@ -304,8 +304,16 @@ describe('enterprise extension: enable change requests', () => {
         expect(result.changeRequestEnvironments).toStrictEqual([]);
     });
 
-    test('the create project function does not return a list of change request envs if we are not on enterprise', async () => {
-        const { service } = createService('oss');
+    test('the create project function returns change request envs regardless of oss/enterprise mode', async () => {
+        const { service, environmentStore } = createService('oss');
+
+        await environmentStore.create({
+            name: 'dev',
+            type: 'production',
+            enabled: true,
+            protected: false,
+            sortOrder: 0,
+        });
 
         const crEnvs = [{ name: 'prod', requiredApprovals: 10 }];
 
@@ -327,7 +335,7 @@ describe('enterprise extension: enable change requests', () => {
             async () => crEnvs,
         );
 
-        expect('changeRequestEnvironments' in result).toBeFalsy();
+        expect(result.changeRequestEnvironments).toStrictEqual(crEnvs);
     });
 
     test("it throws an error if you provide it with environments that don't exist", async () => {
@@ -353,7 +361,7 @@ describe('enterprise extension: enable change requests', () => {
         ).rejects.toThrow(BadDataError);
     });
 
-    test("it does not throw if an error if you provide it with environments that don't exist but aren't on enterprise", async () => {
+    test('it throws an error for non-existent environments regardless of oss/enterprise mode', async () => {
         const { service } = createService('oss');
 
         const projectId = 'fake-project-id';
@@ -373,6 +381,6 @@ describe('enterprise extension: enable change requests', () => {
                 },
                 TEST_AUDIT_USER,
             ),
-        ).resolves.toBeTruthy();
+        ).rejects.toThrow(BadDataError);
     });
 });

@@ -118,9 +118,8 @@ export default class EnvironmentStore implements IEnvironmentStore {
         eventBus: EventEmitter,
         {
             getLogger,
-            isOss,
             flagResolver,
-        }: Pick<IUnleashConfig, 'getLogger' | 'isOss' | 'flagResolver'>,
+        }: Pick<IUnleashConfig, 'getLogger' | 'flagResolver'>,
     ) {
         this.db = db;
         this.logger = getLogger('db/environment-store.ts');

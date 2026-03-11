@@ -1,6 +1,6 @@
 import { render } from 'utils/testRenderer';
 import { ProjectList } from './ProjectList.tsx';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { testServerRoute, testServerSetup } from 'utils/testServer';
 import { CREATE_PROJECT } from '../../providers/AccessProvider/permissions.ts';
 
@@ -19,17 +19,12 @@ const setupApi = () => {
     });
 };
 
-test('Enabled new project button when version and permission allow for it and limit is reached', async () => {
+test('Enabled new project button when permission allows for it', async () => {
     setupApi();
     render(<ProjectList />, {
         permissions: [{ permission: CREATE_PROJECT }],
     });
 
     const button = await screen.findByText('New project');
-    expect(button).toHaveAttribute('aria-disabled', 'true');
-
-    await waitFor(async () => {
-        const button = await screen.findByText('New project');
-        expect(button).not.toHaveAttribute('aria-disabled', 'true');
-    });
+    expect(button).not.toHaveAttribute('aria-disabled', 'true');
 });

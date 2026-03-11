@@ -88,7 +88,7 @@ export const EnvironmentTable = () => {
         }
 
         return baseColumns;
-    }, [isFeatureEnabled]);
+    }, []);
 
     const {
         getTableProps,

@@ -17,7 +17,6 @@ import { useGroupedProjects } from './hooks/useGroupedProjects.ts';
 import { useProjectsSearchAndSort } from './hooks/useProjectsSearchAndSort.ts';
 import { ProjectArchiveLink } from './ProjectArchiveLink/ProjectArchiveLink.tsx';
 import { ProjectsListHeader } from './ProjectsListHeader/ProjectsListHeader.tsx';
-import useUiConfig from 'hooks/api/getters/useUiConfig/useUiConfig';
 import { TablePlaceholder } from 'component/common/Table/index.ts';
 import { ProjectsListViewToggle } from './ProjectsListViewToggle/ProjectsListViewToggle.tsx';
 
@@ -34,7 +33,6 @@ const StyledContainer = styled('div')(({ theme }) => ({
 
 export const ProjectList = () => {
     const { projects, loading, error, refetch } = useProjects();
-    const { isOss } = useUiConfig();
 
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -62,9 +60,9 @@ export const ProjectList = () => {
             ? `${sortedProjects.length} of ${projects.length}`
             : projects.length;
 
-    const myProjects = isOss() ? sortedProjects : groupedProjects.myProjects;
+    const myProjects = groupedProjects.myProjects;
 
-    const otherProjects = isOss() ? [] : groupedProjects.otherProjects;
+    const otherProjects = groupedProjects.otherProjects;
 
     return (
         <PageContent
@@ -75,7 +73,7 @@ export const ProjectList = () => {
                     actions={
                         <>
                             <ConditionallyRender
-                                condition={!isOss() && !isSmallScreen}
+                                condition={!isSmallScreen}
                                 show={
                                     <>
                                         <Search
@@ -87,7 +85,7 @@ export const ProjectList = () => {
                                 }
                             />
 
-                            {!isOss() && <ProjectArchiveLink />}
+                            <ProjectArchiveLink />
                             <ProjectCreationButton
                                 isDialogOpen={Boolean(state.create)}
                                 setIsDialogOpen={(create) =>
@@ -100,7 +98,7 @@ export const ProjectList = () => {
                     }
                 >
                     <ConditionallyRender
-                        condition={!isOss() && isSmallScreen}
+                        condition={isSmallScreen}
                         show={
                             <Search
                                 initialValue={state.query || ''}
@@ -128,14 +126,12 @@ export const ProjectList = () => {
                                 helpText='Favorite projects, projects you own, and projects you are a member of'
                                 actions={
                                     <>
-                                        {!isOss() && (
-                                            <ProjectsListViewToggle
-                                                view={state.view}
-                                                setView={(view) =>
-                                                    setState({ view })
-                                                }
-                                            />
-                                        )}
+                                        <ProjectsListViewToggle
+                                            view={state.view}
+                                            setView={(view) =>
+                                                setState({ view })
+                                            }
+                                        />
                                         <ProjectsListSort
                                             sortBy={state.sortBy}
                                             setSortBy={(sortBy) =>
@@ -152,11 +148,7 @@ export const ProjectList = () => {
                             <ProjectGroup
                                 loading={loading}
                                 view={state.view}
-                                projects={
-                                    isOss()
-                                        ? sortedProjects
-                                        : groupedProjects.myProjects
-                                }
+                                projects={groupedProjects.myProjects}
                             />
                         </div>
                     )}

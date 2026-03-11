@@ -26,8 +26,6 @@ import { Search } from 'component/common/Search/Search';
 import { HighlightCell } from 'component/common/Table/cells/HighlightCell/HighlightCell';
 import { TextCell } from 'component/common/Table/cells/TextCell/TextCell';
 import type { IEnvironment } from 'interfaces/environments';
-import { useUiFlag } from 'hooks/useUiFlag';
-import { PremiumFeature } from 'component/common/PremiumFeature/PremiumFeature';
 import useUiConfig from 'hooks/api/getters/useUiConfig/useUiConfig';
 
 const StyledAlert = styled(Alert)(({ theme }) => ({
@@ -38,7 +36,6 @@ export const EnvironmentTable = () => {
     const { changeSortOrder } = useEnvironmentApi();
     const { setToastApiError } = useToast();
     const { environments, mutateEnvironments } = useEnvironments();
-    const isFeatureEnabled = useUiFlag('EEA');
     const { isEnterprise } = useUiConfig();
 
     const onMoveItem: OnMoveItem = useCallback(
@@ -66,24 +63,20 @@ export const EnvironmentTable = () => {
     const columnsWithActions = useMemo(() => {
         const baseColumns = [
             ...COLUMNS,
-            ...(isFeatureEnabled
-                ? [
-                      {
-                          Header: 'Actions',
-                          id: 'Actions',
-                          align: 'center',
-                          width: '1%',
-                          Cell: ({
-                              row: { original },
-                          }: {
-                              row: { original: IEnvironment };
-                          }) => (
-                              <EnvironmentActionCell environment={original} />
-                          ),
-                          disableGlobalFilter: true,
-                      },
-                  ]
-                : []),
+            ...[
+                {
+                    Header: 'Actions',
+                    id: 'Actions',
+                    align: 'center',
+                    width: '1%',
+                    Cell: ({
+                        row: { original },
+                    }: {
+                        row: { original: IEnvironment };
+                    }) => <EnvironmentActionCell environment={original} />,
+                    disableGlobalFilter: true,
+                },
+            ],
         ];
         if (isEnterprise()) {
             baseColumns.splice(2, 0, {
@@ -129,14 +122,6 @@ export const EnvironmentTable = () => {
     const header = (
         <PageHeader title={`Environments (${count})`} actions={headerActions} />
     );
-
-    if (!isFeatureEnabled) {
-        return (
-            <PageContent header={header}>
-                <PremiumFeature feature='environments' />
-            </PageContent>
-        );
-    }
 
     return (
         <PageContent header={header}>
